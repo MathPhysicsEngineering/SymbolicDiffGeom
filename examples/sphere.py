@@ -19,6 +19,7 @@ from visualization import (
     _OPEN3D_AVAILABLE
 )
 import matplotlib.pyplot as plt
+from sympy import lambdify
 
 print("1. Chart Construction and Basic Properties")
 print("----------------------------------------")
@@ -111,84 +112,66 @@ vf_rot = VectorField(chart_N, [0, 1])  # Rotation around z-axis
 vf_grad = VectorField(chart_N, [-sp.sin(theta), sp.cos(theta)])  # Gradient-like field
 vf_radial = VectorField(chart_N, [1, 0])  # Radial field
 
-# Create figure for rotational vector field
+# Create a single figure for each vector field with its flow
+def plot_vector_field_with_flow(vf, title, t_span):
+    fig = plt.figure(figsize=(12, 12))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Remove all background elements
+    ax.set_axis_off()
+    ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.grid(False)
+
+    # Plot the manifold first (most transparent)
+    coords = chart_N.coords
+    emb_func = lambdify(coords, chart_N.embedding.map_exprs, 'numpy')
+    u = np.linspace(chart_N.domain.bounds[0][0], chart_N.domain.bounds[0][1], 50)
+    v = np.linspace(chart_N.domain.bounds[1][0], chart_N.domain.bounds[1][1], 50)
+    U, V = np.meshgrid(u, v)
+    xyz = np.array([emb_func(ux, vx) for ux, vx in zip(U.flatten(), V.flatten())])
+    X = xyz[:, 0].reshape(U.shape)
+    Y = xyz[:, 1].reshape(U.shape)
+    Z = xyz[:, 2].reshape(U.shape)
+    ax.plot_surface(X, Y, Z, color='lightblue', alpha=0.15)
+
+    # Generate flow start points
+    phi_values = np.linspace(np.pi/12, 11*np.pi/12, 12)
+    theta_values = np.linspace(0, 2*np.pi, 8, endpoint=False)
+
+    start_points = []
+    for phi in phi_values:
+        for theta in theta_values:
+            if abs(phi - np.pi/2) > np.pi/6:
+                start_points.append((phi, theta))
+            elif len(start_points) % 2 == 0:
+                start_points.append((phi, theta))
+
+    # Add near-polar curves
+    for theta in np.linspace(0, 2*np.pi, 12, endpoint=False):
+        start_points.append((np.pi/24, theta))
+        start_points.append((23*np.pi/24, theta))
+
+    # Plot flow lines next
+    FlowPlotter(chart_N, vf).plot(start_points, t_span=t_span, steps=200, ax=ax, color='blue', alpha=0.8)
+
+    # Plot vector field on top
+    VectorFieldPlotter(chart_N, vf).plot_matplotlib(ax=ax, resolution=25, scale=0.08, color='red', alpha=0.8)
+
+    ax.view_init(elev=30, azim=45)
+    ax.set_title(title)
+    plt.show()
+
+# Plot each vector field with its flow
 print("\nPlotting rotational vector field with flows:")
-fig = plt.figure(figsize=(12, 12))
-ax = fig.add_subplot(111, projection='3d')
+plot_vector_field_with_flow(vf_rot, "Rotational Vector Field and Flow Lines", (0, 4*np.pi))
 
-# Plot the manifold with coordinate grid
-plotter.set_backend('matplotlib')
-plotter._plot_surface_matplotlib(resolution=50, color='lightblue', alpha=0.3)
-plotter.plot_coordinate_grid(grid_lines=10, color='gray', alpha=0.2)
-
-# Add vector field with shorter, denser arrows
-VectorFieldPlotter(chart_N, vf_rot).plot_matplotlib(ax=ax, resolution=25, scale=0.08, color='red', alpha=0.7)
-
-# Add flow lines with more points for smoother curves
-start_points = [
-    (np.pi/4, 0),
-    (np.pi/3, np.pi/2),
-    (np.pi/2, np.pi),
-    (2*np.pi/3, 3*np.pi/2)
-]
-FlowPlotter(chart_N, vf_rot).plot(start_points, t_span=(0, 4*np.pi), steps=200, ax=ax, color='blue', alpha=0.8)
-
-# Improve the view
-ax.view_init(elev=30, azim=45)
-ax.set_title("Rotational Vector Field and Flow Lines")
-plt.show()
-
-# Create figure for gradient vector field
 print("\nPlotting gradient vector field with flows:")
-fig = plt.figure(figsize=(12, 12))
-ax = fig.add_subplot(111, projection='3d')
+plot_vector_field_with_flow(vf_grad, "Gradient Vector Field and Flow Lines", (0, 2))
 
-# Plot the manifold with coordinate grid
-plotter._plot_surface_matplotlib(resolution=50, color='lightblue', alpha=0.3)
-plotter.plot_coordinate_grid(grid_lines=10, color='gray', alpha=0.2)
-
-# Add vector field with shorter, denser arrows
-VectorFieldPlotter(chart_N, vf_grad).plot_matplotlib(ax=ax, resolution=25, scale=0.08, color='red', alpha=0.7)
-
-# Add flow lines with more points for smoother curves
-start_points = [
-    (np.pi/6, 0),
-    (np.pi/4, np.pi/2),
-    (np.pi/3, np.pi),
-    (np.pi/2, 3*np.pi/2)
-]
-FlowPlotter(chart_N, vf_grad).plot(start_points, t_span=(0, 2), steps=200, ax=ax, color='blue', alpha=0.8)
-
-# Improve the view
-ax.view_init(elev=30, azim=45)
-ax.set_title("Gradient Vector Field and Flow Lines")
-plt.show()
-
-# Create figure for radial vector field
 print("\nPlotting radial vector field with flows:")
-fig = plt.figure(figsize=(12, 12))
-ax = fig.add_subplot(111, projection='3d')
-
-# Plot the manifold with coordinate grid
-plotter._plot_surface_matplotlib(resolution=50, color='lightblue', alpha=0.3)
-plotter.plot_coordinate_grid(grid_lines=10, color='gray', alpha=0.2)
-
-# Add vector field with shorter, denser arrows
-VectorFieldPlotter(chart_N, vf_radial).plot_matplotlib(ax=ax, resolution=25, scale=0.08, color='red', alpha=0.7)
-
-# Add flow lines with more points for smoother curves
-start_points = [
-    (np.pi/6, 0),
-    (np.pi/6, np.pi/2),
-    (np.pi/6, np.pi),
-    (np.pi/6, 3*np.pi/2)
-]
-FlowPlotter(chart_N, vf_radial).plot(start_points, t_span=(0, 1), steps=200, ax=ax, color='blue', alpha=0.8)
-
-# Improve the view
-ax.view_init(elev=30, azim=45)
-ax.set_title("Radial Vector Field and Flow Lines")
-plt.show()
+plot_vector_field_with_flow(vf_radial, "Radial Vector Field and Flow Lines", (0, 1))
 
 print("\n5. Geodesics and Parallel Transport")
 print("---------------------------------")
@@ -203,9 +186,24 @@ initial_conditions = [
 fig = plt.figure(figsize=(12, 12))
 ax = fig.add_subplot(111, projection='3d')
 
-# Plot the manifold with coordinate grid first
-plotter._plot_surface_matplotlib(resolution=30, color='lightblue', alpha=0.3)
-plotter.plot_coordinate_grid(grid_lines=10, color='gray', alpha=0.2)
+# Remove all background elements
+ax.set_axis_off()
+ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+ax.grid(False)
+
+# Plot the manifold first
+coords = chart_N.coords
+emb_func = lambdify(coords, chart_N.embedding.map_exprs, 'numpy')
+u = np.linspace(chart_N.domain.bounds[0][0], chart_N.domain.bounds[0][1], 50)
+v = np.linspace(chart_N.domain.bounds[1][0], chart_N.domain.bounds[1][1], 50)
+U, V = np.meshgrid(u, v)
+xyz = np.array([emb_func(ux, vx) for ux, vx in zip(U.flatten(), V.flatten())])
+X = xyz[:, 0].reshape(U.shape)
+Y = xyz[:, 1].reshape(U.shape)
+Z = xyz[:, 2].reshape(U.shape)
+ax.plot_surface(X, Y, Z, color='lightblue', alpha=0.15)
 
 # Plot geodesics
 FlowPlotter.plot_geodesics(chart_N.connection, initial_conditions, t_span=(0, 2*np.pi), ax=ax)
@@ -238,6 +236,28 @@ sp.pprint(Ric)
 K = connection.scalar_curvature()
 print("\nScalar curvature:", K)
 
+# Visualize scalar curvature as a scalar field
+print("\nVisualizing scalar curvature:")
+# Create scalar field for Gaussian curvature
+K_field = sp.simplify(K)  # Simplify the expression
+print("\nGaussian curvature expression:", K_field)
+
+# Plot scalar field
+fig = plt.figure(figsize=(12, 12))
+ax = fig.add_subplot(111, projection='3d')
+
+# Remove all background elements
+ax.set_axis_off()
+ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+ax.grid(False)
+
+# Plot scalar field
+ScalarFieldVisualizer.plot_scalar_field(chart_N, K_field, ax=ax, resolution=50, cmap='coolwarm')
+ax.set_title("Gaussian Curvature")
+plt.show()
+
 print("\n7. Interactive Features")
 print("---------------------")
 print("Starting interactive geodesic visualization...")
@@ -256,6 +276,19 @@ field_names = ['x coordinate', 'z coordinate', 'height squared']
 
 for field, name in zip(scalar_fields, field_names):
     print(f"\nVisualizing scalar field: {name}")
-    ScalarFieldVisualizer.plot_scalar_field(chart_N, field)
+    fig = plt.figure(figsize=(12, 12))
+    ax = fig.add_subplot(111, projection='3d')
+    
+    # Remove all background elements
+    ax.set_axis_off()
+    ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.grid(False)
+    
+    # Plot scalar field
+    ScalarFieldVisualizer.plot_scalar_field(chart_N, field, ax=ax, resolution=50)
+    ax.view_init(elev=30, azim=45)
+    plt.show()
 
 print("\nSphere demonstration complete.")

@@ -225,7 +225,7 @@ class Open3DPlotter:
 # ---------------- Scalar Field Visualizer ----------------
 class ScalarFieldVisualizer:
     @staticmethod
-    def plot_scalar_field(chart: Chart, scalar_expr: sp.Expr, resolution: int = 50, cmap: str = 'viridis') -> None:
+    def plot_scalar_field(chart: Chart, scalar_expr: sp.Expr, resolution: int = 50, cmap: str = 'viridis', ax=None) -> None:
         coords = chart.coords
         scalar_func = lambdify(coords, scalar_expr, 'numpy')
         u = np.linspace(chart.domain.bounds[0][0], chart.domain.bounds[0][1], resolution)
@@ -233,19 +233,42 @@ class ScalarFieldVisualizer:
         U, V = np.meshgrid(u, v)
         Z = scalar_func(U, V)
 
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
+        if ax is None:
+            fig = plt.figure(figsize=(12, 12))
+            ax = fig.add_subplot(111, projection='3d')
+            
+        # Remove all background elements
+        ax.set_axis_off()
+        ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.grid(False)
+            
         emb_func = lambdify(coords, chart.embedding.map_exprs, 'numpy')
         xyz = np.array([emb_func(ux, vx) for ux, vx in zip(U.flatten(), V.flatten())])
         X = xyz[:, 0].reshape(U.shape)
         Y = xyz[:, 1].reshape(U.shape)
-        if xyz.shape[1] == 3:
-            Z3 = xyz[:, 2].reshape(U.shape)
+        Z3 = xyz[:, 2].reshape(U.shape)
+        
+        # Handle color normalization carefully
+        Z_min, Z_max = np.nanmin(Z), np.nanmax(Z)
+        if Z_min == Z_max:
+            Z_norm = np.zeros_like(Z)
         else:
-            Z3 = np.zeros_like(X)
-        ax.plot_surface(X, Y, Z3, facecolors=plt.cm.get_cmap(cmap)(Z / np.max(Z)), rstride=1, cstride=1)
-        plt.title("Scalar field overlay")
-        plt.show()
+            Z_norm = (Z - Z_min) / (Z_max - Z_min)
+            
+        # Plot the surface using the scalar field values for coloring
+        surf = ax.plot_surface(X, Y, Z3, 
+                             cmap=plt.cm.get_cmap(cmap),
+                             vmin=Z_min, vmax=Z_max,
+                             facecolors=None,
+                             alpha=0.8)
+        
+        # Add a color bar
+        plt.colorbar(surf, ax=ax)
+        
+        if ax is None:
+            plt.show()
 
 # ---------------- Interactive Tools ----------------
 class InteractiveTools:
@@ -408,56 +431,33 @@ class ManifoldPlotter:
         vis.destroy_window()
 
     def _plot_surface_matplotlib(self, resolution=50, color='lightblue', alpha=0.4):
-        """Plot the surface using matplotlib with improved shading and visibility."""
-        dom = self.chart.domain
+        """Plot the surface using matplotlib."""
+        fig = plt.figure(figsize=(10, 10))
+        ax = fig.add_subplot(111, projection='3d')
+        
+        # Remove all background elements
+        ax.set_axis_off()
+        ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.grid(False)
+        
         coords = self.chart.coords
         emb_func = lambdify(coords, self.chart.embedding.map_exprs, 'numpy')
-
-        u = np.linspace(dom.bounds[0][0], dom.bounds[0][1], resolution)
-        v = np.linspace(dom.bounds[1][0], dom.bounds[1][1], resolution)
-        uu, vv = np.meshgrid(u, v)
-        pts = np.array([emb_func(ux, vx) for ux, vx in zip(uu.flatten(), vv.flatten())])
         
-        X = pts[:, 0].reshape(resolution, resolution)
-        Y = pts[:, 1].reshape(resolution, resolution)
-        Z = pts[:, 2].reshape(resolution, resolution)
-
-        # Get current axis or create new one
-        ax = plt.gca()
-        if not hasattr(ax, 'get_zlim'):  # Check if current axis is 3D
-            fig = plt.figure(figsize=(10, 10))
-            ax = fig.add_subplot(111, projection='3d')
+        u = np.linspace(self.chart.domain.bounds[0][0], self.chart.domain.bounds[0][1], resolution)
+        v = np.linspace(self.chart.domain.bounds[1][0], self.chart.domain.bounds[1][1], resolution)
+        U, V = np.meshgrid(u, v)
         
-        # Plot surface with improved appearance
-        surf = ax.plot_surface(X, Y, Z, 
-                             color=color,
-                             alpha=alpha,
-                             antialiased=True,
-                             shade=True,
-                             lightsource=matplotlib.colors.LightSource(azdeg=315, altdeg=45))
+        xyz = np.array([emb_func(ux, vx) for ux, vx in zip(U.flatten(), V.flatten())])
+        X = xyz[:, 0].reshape(U.shape)
+        Y = xyz[:, 1].reshape(U.shape)
+        if xyz.shape[1] == 3:
+            Z = xyz[:, 2].reshape(U.shape)
+        else:
+            Z = np.zeros_like(X)
         
-        # Try to set equal aspect ratio in a version-compatible way
-        try:
-            ax.set_box_aspect([1,1,1])
-        except AttributeError:
-            try:
-                # Older matplotlib versions
-                ax.set_aspect('equal')
-            except:
-                # If all else fails, try to manually set the aspect ratio
-                ax.get_proj = lambda: np.dot(Axes3D.get_proj(ax), np.diag([1, 1, 1, 1]))
-        
-        # Remove axis clutter
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.set_zticks([])
-        
-        # Set axis limits to ensure sphere is centered and properly scaled
-        r = 1.1  # Slightly larger than unit sphere
-        ax.set_xlim([-r, r])
-        ax.set_ylim([-r, r])
-        ax.set_zlim([-r, r])
-        
+        ax.plot_surface(X, Y, Z, color=color, alpha=alpha)
         return ax
 
     def plot_coordinate_grid(self, grid_lines=15, color='gray', alpha=0.2, linewidth=0.5, ax=None):

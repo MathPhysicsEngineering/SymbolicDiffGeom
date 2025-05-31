@@ -1,40 +1,44 @@
-# SymbolicDiffGeom
+# Symbolic Differential Geometry
 
-A Python library for symbolic differential geometry computations and visualizations.
+A Python library for symbolic differential geometry computations and visualizations. This project provides tools for working with manifolds, charts, vector fields, connections, and more.
 
 ## Features
 
-- Chart definitions and manifold constructions
-- Symbolic computation of geometric objects (metrics, connections, etc.)
-- Vector field operations and flow computations
-- Advanced visualization capabilities:
-  - Surface plotting with coordinate grids
-  - Vector field visualization with arrows
-  - Flow and geodesic visualization
-  - Support for both matplotlib and Open3D backends
-
-## Installation
-
-```bash
-git clone https://github.com/MathPhysicsEngineering/SymbolicDiffGeom.git
-cd SymbolicDiffGeom
-pip install -r requirements.txt
-```
-
-## Dependencies
-
-- sympy
-- numpy
-- matplotlib
-- open3d (optional, for advanced 3D visualization)
+- Chart definitions and transitions
+- Metric computations
+- Levi-Civita connections
+- Vector fields and flows
+- Geodesics and parallel transport
+- Curvature analysis (Riemann tensor, Ricci tensor, scalar curvature)
+- Advanced 3D visualizations using matplotlib and Open3D
 
 ## Examples
 
-See the `examples` directory for demonstrations, including:
+The `examples` directory contains demonstration scripts:
+- `sphere.py`: Comprehensive demonstration using S² (2-sphere)
 
-- `sphere.py`: Comprehensive demonstration of S² with vector fields, flows, and geodesics
-- More examples coming soon...
+## Installation
+
+1. Clone the repository
+2. Install dependencies:
+```bash
+pip install sympy numpy matplotlib
+# Optional for advanced 3D visualization:
+pip install open3d
+```
+
+## Usage
+
+See the examples directory for detailed usage demonstrations.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+MIT License - see LICENSE file for details.
+
+## Author
+
+Created by MathPhysicsEngineering (YouTube Channel)
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. 
