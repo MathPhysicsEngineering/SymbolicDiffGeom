@@ -138,16 +138,6 @@ def main():
         ax.view_init(elev=30, azim=45)
         save_matplotlib_figure(fig, f"figures/flow_{name}.png")
 
-        # Open3D version - Combined visualization
-        if _OPEN3D_AVAILABLE:
-            Open3DPlotter.visualize_flow(
-                chart_N, vf, start_points, 
-                steps=2000,  # Much longer flow lines
-                dt=0.1,  # Larger time step to cover more distance
-                vector_resolution=40,  # Denser vector field
-                vector_scale=0.02  # Smaller vectors
-            )
-
     # Generate parallel transport visualizations
     print("\n3. Parallel Transport Examples")
     
@@ -166,17 +156,7 @@ def main():
     ax.view_init(elev=30, azim=45)
     save_matplotlib_figure(fig, "figures/parallel_transport_great_circle.png")
 
-    # Open3D version
-    if _OPEN3D_AVAILABLE:
-        Open3DPlotter.visualize_parallel_transport(
-            chart_N,
-            chart_N.connection,
-            (np.pi/3, 0),  # start point
-            (1, 0),  # initial vector
-            (0, 1),  # initial velocity
-            steps=100,
-            dt=0.05
-        )
+    # Skip Open3D version since it's causing issues
 
     # Example 2: Along meridian (avoiding poles)
     # Matplotlib version
@@ -192,18 +172,6 @@ def main():
     )
     ax.view_init(elev=30, azim=45)
     save_matplotlib_figure(fig, "figures/parallel_transport_meridian.png")
-
-    # Open3D version
-    if _OPEN3D_AVAILABLE:
-        Open3DPlotter.visualize_parallel_transport(
-            chart_N,
-            chart_N.connection,
-            (np.pi/6, np.pi/4),  # start point
-            (0, 1),  # initial vector
-            (1, 0),  # initial velocity
-            steps=100,
-            dt=0.05
-        )
 
     # Generate LaTeX documentation
     print("\nGenerating comprehensive LaTeX documentation...")

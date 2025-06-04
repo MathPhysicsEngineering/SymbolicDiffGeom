@@ -1,0 +1,151 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage[margin=1in]{geometry}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\title{Detailed Analysis of the 2-Sphere: \\ A Complete Geometric Study}
+\author{Symbolic Differential Geometry Package}
+\date{\today}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document presents a comprehensive study of the geometry of the 2-sphere, including its parametrization, metric structure, connection, curvature, and vector fields. We provide detailed computations, visualizations, and explanations for each aspect, making this a complete reference for understanding spherical geometry.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+The 2-sphere $S^2$ is one of the most fundamental curved spaces in differential geometry. It serves as an excellent example for understanding the key concepts of Riemannian geometry. In this document, we will systematically explore its geometric properties, starting from basic definitions and building up to more advanced concepts like parallel transport and curvature.
+
+\section{Parametrization and Charts}
+\subsection{Standard Spherical Coordinates}
+We begin with the standard spherical coordinate parametrization of the unit sphere. The embedding into $\mathbb{R}^3$ is given by:
+\[
+\begin{aligned}
+x &= \sin{\left(\phi \right)} \cos{\left(\theta \right)}\\
+y &= \sin{\left(\phi \right)} \sin{\left(\theta \right)}\\
+z &= \cos{\left(\phi \right)}
+\end{aligned}
+\]
+where $\phi \in [0,\pi]$ is the polar angle measured from the positive $z$-axis, and $\theta \in [0,2\pi]$ is the azimuthal angle in the $x$-$y$ plane.
+
+\subsection{Coordinate Grid}
+The coordinate grid on the sphere helps visualize how the parameters $\phi$ and $\theta$ cover the surface. The lines of constant $\phi$ form parallels (circles of latitude), while lines of constant $\theta$ form meridians (circles of longitude).
+
+\section{Tangent Space and Metric Structure}
+\subsection{Tangent Vectors}
+The tangent vectors at a point $(\phi,\theta)$ are obtained by differentiating the embedding map with respect to the coordinates:
+\[
+\begin{aligned}
+\frac{\partial}{\partial \phi} &= \left[\begin{matrix}\cos{\left(\phi \right)} \cos{\left(\theta \right)}\\\sin{\left(\theta \right)} \cos{\left(\phi \right)}\\- \sin{\left(\phi \right)}\end{matrix}\right]\\
+\frac{\partial}{\partial \theta} &= \left[\begin{matrix}- \sin{\left(\phi \right)} \sin{\left(\theta \right)}\\\sin{\left(\phi \right)} \cos{\left(\theta \right)}\\0\end{matrix}\right]
+\end{aligned}
+\]
+These vectors form a basis for the tangent space at each point.
+
+\subsection{First Fundamental Form}
+The metric tensor (first fundamental form) is computed by taking inner products of the tangent vectors:
+\[
+g_{ij} = \left[\begin{matrix}1 & 0\\0 & \sin^{2}{\left(\phi \right)}\end{matrix}\right]
+\]
+This gives the line element:
+\[
+ds^2 = d\phi^2 + \sin^2\phi\,d\theta^2
+\]
+The metric encodes how distances and angles are measured on the sphere.
+
+\section{Levi-Civita Connection}
+\subsection{Christoffel Symbols}
+The Levi-Civita connection is the unique torsion-free connection compatible with the metric. Its components are given by the Christoffel symbols:
+\[
+\begin{aligned}
+\Gamma^0_{\,11} &= - \frac{\sin{\left(2 \phi \right)}}{2} \\
+\Gamma^1_{\,01} &= \frac{1}{\tan{\left(\phi \right)}} \\
+\Gamma^1_{\,10} &= \frac{1}{\tan{\left(\phi \right)}} \\
+\end{aligned}
+\]
+These symbols determine how vectors are parallel transported along curves on the sphere.
+
+\section{Curvature}
+\subsection{Riemann Curvature Tensor}
+The Riemann curvature tensor measures how parallel transport around infinitesimal loops fails to return vectors to their original position. Its non-zero components are:
+\[
+\begin{aligned}
+R^0_{\,101} &= \frac{\sin{\left(2 \phi \right)}}{2 \tan{\left(\phi \right)}} - \cos{\left(2 \phi \right)} \\
+R^0_{\,110} &= - \frac{\sin{\left(2 \phi \right)}}{2 \tan{\left(\phi \right)}} + \cos{\left(2 \phi \right)} \\
+R^1_{\,001} &= -1 \\
+R^1_{\,010} &= 1 \\
+\end{aligned}
+\]
+
+\subsection{Ricci Tensor and Scalar Curvature}
+The Ricci tensor is obtained by contracting the Riemann tensor:
+\[
+\text{Ric} = \left[\begin{matrix}1 & 0\\0 & \frac{\sin{\left(2 \phi \right)}}{2 \tan{\left(\phi \right)}} - \cos{\left(2 \phi \right)}\end{matrix}\right]
+\]
+The scalar curvature (Gaussian curvature) is:
+\[
+K = 2
+\]
+The constant value of 2 reflects the fact that the sphere has constant positive curvature.
+
+\section{Vector Fields and Their Flows}
+\subsection{Rotational Vector Field}
+The rotational vector field is defined by its components:
+\[
+V = \left[\begin{matrix}0\\1\end{matrix}\right]
+\]
+The flow of this vector field can be computed explicitly:
+\[
+\gamma(t) = \left[\begin{matrix}\phi\\t + \theta\end{matrix}\right]
+\]
+This represents the position at time $t$ of a particle following the flow lines starting from initial coordinates $(\phi_0, \theta_0)$.
+
+\subsection{Gradient Vector Field}
+The gradient vector field is defined by its components:
+\[
+V = \left[\begin{matrix}- \sin{\left(\theta \right)}\\\cos{\left(\theta \right)}\end{matrix}\right]
+\]
+The flow of this vector field can be computed explicitly:
+\[
+\gamma(t) = \left[\begin{matrix}\phi - t \sin{\left(\theta \right)}\\t \cos{\left(\theta \right)} + \theta\end{matrix}\right]
+\]
+This represents the position at time $t$ of a particle following the flow lines starting from initial coordinates $(\phi_0, \theta_0)$.
+
+\subsection{Radial Vector Field}
+The radial vector field is defined by its components:
+\[
+V = \left[\begin{matrix}1\\0\end{matrix}\right]
+\]
+The flow of this vector field can be computed explicitly:
+\[
+\gamma(t) = \left[\begin{matrix}\phi + t\\\theta\end{matrix}\right]
+\]
+This represents the position at time $t$ of a particle following the flow lines starting from initial coordinates $(\phi_0, \theta_0)$.
+
+\section{Geodesics}
+The geodesic equations on the sphere are:
+\[
+\begin{aligned}
+\ddot{x}^0 + - \frac{\left(\dot{x}^1\right)^{2} \sin{\left(2 \phi \right)}}{2} &= 0 \\
+\ddot{x}^1 + \frac{2 \dot{x}^0 \dot{x}^1}{\tan{\left(\phi \right)}} &= 0 \\
+\end{aligned}
+\]
+where $x^0 = \phi$ and $x^1 = \theta$. These equations show that geodesics are great circles on the sphere, which are the curves of shortest distance between two points.
+
+\section{Parallel Transport Examples}
+We conclude with two important examples of parallel transport on the sphere:
+
+\subsection{Transport Along a Great Circle}
+When we parallel transport a vector along a great circle, the vector maintains a constant angle with the great circle. This leads to the interesting phenomenon that when transported around a closed loop, the vector does not return to its original direction, but is rotated by an angle proportional to the solid angle enclosed by the loop.
+
+\subsection{Transport Along a Meridian}
+Parallel transport along a meridian demonstrates how vectors change direction relative to the local coordinate basis. A vector initially pointing East will maintain its angle with the meridian but appear to rotate relative to the coordinate grid.
+
+\end{document}
